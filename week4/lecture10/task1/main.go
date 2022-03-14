@@ -9,37 +9,34 @@ import (
 type ConcurrentPrinter struct {
 	sync.WaitGroup
 	sync.Mutex
-
-	text string
-}
-func incrementFoo(cp *ConcurrentPrinter, times int){
-	for i := 0; i < times/2; i++{
-		cp.Lock()
-		cp.text += "foo"
-		cp.Unlock()
-		time.Sleep(100 * time.Millisecond)
-	}
-	cp.Done()
 }
 
-func incrementBar(cp *ConcurrentPrinter, times int){
-	for i := 0; i < times/2; i++{
-		cp.Lock()
-		cp.text += "bar"
-		cp.Unlock()
-		time.Sleep(100 * time.Millisecond)
-	}
-	cp.Done()
-
-}
 
 func (cp *ConcurrentPrinter) printFoo(times int) {
-	cp.Add(1)
-	go incrementFoo(cp, times)
+	go func() {
+		for i := 0; i < times; i++ {
+			defer cp.Done()
+			cp.Add(1)
+			if  i % 2== 0 {
+				fmt.Print("foo")
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}()
 }
 func (cp *ConcurrentPrinter) printBar(times int) {
-	cp.Add(1)
-	go incrementBar(cp, times)
+	fmt.Print("")
+	go func() {
+		for i := 0; i < times; i++ {
+			defer cp.Done()
+			cp.Add(1)
+			if  i % 2 != 0 {
+				fmt.Print("bar")
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}()
+
 }
 
 func main() {
@@ -48,8 +45,6 @@ func main() {
 	cp.printFoo(times)
 	cp.printBar(times)
 	cp.Wait()
-	fmt.Println(cp.text)
-
 }
 
 
