@@ -21,6 +21,8 @@ type Stories struct {
 type Story struct {
 	Title string `json:"title"`
 	Score int `json:"score"`
+	Time int `json:"time"`
+	ID int `json:"id"`
 
 }
 
@@ -124,9 +126,6 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-
-
-
 	mux.HandleFunc("/top", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -144,6 +143,7 @@ func main() {
 
 		tmpl.Execute(w, data)
 	})
+
 	mux.HandleFunc("/api/top", HandleTopStories())
 
 	log.Fatal(http.ListenAndServe(":8000", mux))
